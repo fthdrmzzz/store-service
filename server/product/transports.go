@@ -1,8 +1,10 @@
 package product
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/go-kit/kit/endpoint"
@@ -65,4 +67,22 @@ func DecodeDeleteProductRequest(_ context.Context, r *http.Request) (interface{}
 
 func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	return json.NewEncoder(w).Encode(response)
+}
+
+func EncodeRequest(ctx context.Context, r *http.Request, request interface{}) (err error) {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(request); err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(&buf)
+	return nil
+}
+
+func DecodeAddProductResponse(_ context.Context, r *http.Response) (interface{}, error) {
+	var response addProductResponse
+	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+	return response, nil
+
 }

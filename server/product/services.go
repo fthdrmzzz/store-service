@@ -26,3 +26,6 @@ func (ps ProductService) GetAllProducts() error {
 	fmt.Print("")
 	return nil
 }
+
+// ServiceMiddleware is a chainable behavior modifier for StringService.
+type ServiceMiddleware func(ProductServer) ProductServer

@@ -8,30 +8,41 @@ import (
 )
 
 type InstrumentingMiddleware struct {
-	requestCount   metrics.Counter
-	requestLatency metrics.Histogram
-	countResult    metrics.Histogram
-	next           ProductServer
+	RequestCount   metrics.Counter
+	RequestLatency metrics.Histogram
+	CountResult    metrics.Histogram
+	Next           ProductServer
 }
 
 func (mw InstrumentingMiddleware) AddProduct(userId int, name string, price int16) (err error) {
 	defer func(begin time.Time) {
 		lvs := []string{"method", "uppercase", "error", fmt.Sprint(err != nil)}
-		mw.requestCount.With(lvs...).Add(1)
-		mw.requestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
+		mw.RequestCount.With(lvs...).Add(1)
+		mw.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	err = mw.next.AddProduct(userId, name, price)
+	err = mw.Next.AddProduct(userId, name, price)
 	return
 }
 
 func (mw InstrumentingMiddleware) DeleteProduct(productId int) (err error) {
 	defer func(begin time.Time) {
 		lvs := []string{"method", "uppercase", "error", fmt.Sprint(err != nil)}
-		mw.requestCount.With(lvs...).Add(1)
-		mw.requestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
+		mw.RequestCount.With(lvs...).Add(1)
+		mw.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	err = mw.next.DeleteProduct(productId)
+	err = mw.Next.DeleteProduct(productId)
+	return
+}
+
+func (mw InstrumentingMiddleware) GetAllProducts() (err error) {
+	defer func(begin time.Time) {
+		lvs := []string{"method", "uppercase", "error", fmt.Sprint(err != nil)}
+		mw.RequestCount.With(lvs...).Add(1)
+		mw.RequestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	err = mw.Next.GetAllProducts()
 	return
 }
